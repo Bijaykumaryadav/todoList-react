@@ -56,12 +56,30 @@ function App() {
     } else {
       let editIndex = formData.index;
       let oldData = userData;
-      oldData[editIndex]["uname"] = formData.uname;
-      oldData[editIndex]["uemail"] = formData.uemail;
-      oldData[editIndex]["uphone"] = formData.uphone;
-      oldData[editIndex]["umessage"] = formData.umessage;
 
-      setUserData(oldData);
+      let checkFilterUser = userData.filter(
+        (v, i) =>
+          (v.uemail == formData.uemail || v.uphone == formData.uphone) &&
+          i != editIndex
+      );
+
+      if (checkFilterUser.length == 0) {
+        oldData[editIndex]["uname"] = formData.uname;
+        oldData[editIndex]["uemail"] = formData.uemail;
+        oldData[editIndex]["uphone"] = formData.uphone;
+        oldData[editIndex]["umessage"] = formData.umessage;
+
+        setUserData(oldData);
+        setFormData({
+          uname: "",
+          uemail: "",
+          uphone: "",
+          umessage: "",
+          index: "",
+        });
+      } else {
+        toast.error("Email or Phone already Exists...");
+      }
     }
   };
 
