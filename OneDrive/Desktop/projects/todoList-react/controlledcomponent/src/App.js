@@ -1,6 +1,8 @@
 import "./App.css";
 import { useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [formData, setFormData] = useState({
@@ -31,21 +33,55 @@ function App() {
       umessage: formData.umessage,
     };
 
-    const oldUserData = [...userData, currentUserFormdata]; // Old Array + New Array Elements
-    setUserData(oldUserData);
+    if (formData.index === "") {
+      let checkFilterUser = userData.filter(
+        (v) => v.uemail == formData.uemail || v.uphone == formData.uphone
+      );
 
-    // Clear form after submission
-    setFormData({
-      uname: "",
-      uemail: "",
-      uphone: "",
-      umessage: "",
-      index: "",
-    });
+      if (checkFilterUser.length == 1) {
+        toast.error("Email id or phone no already exists !!");
+      } else {
+        const oldUserData = [...userData, currentUserFormdata]; // Old Array + New Array Elements
+        setUserData(oldUserData);
+
+        // Clear form after submission
+        setFormData({
+          uname: "",
+          uemail: "",
+          uphone: "",
+          umessage: "",
+          index: "",
+        });
+      }
+    } else {
+      let editIndex = formData.index;
+      let oldData = userData;
+      oldData[editIndex]["uname"] = formData.uname;
+      oldData[editIndex]["uemail"] = formData.uemail;
+      oldData[editIndex]["uphone"] = formData.uphone;
+      oldData[editIndex]["umessage"] = formData.umessage;
+
+      setUserData(oldData);
+    }
+  };
+
+  // note: filter gives us a new array after each update
+  let deleteRow = (indexNumber) => {
+    let filterDataafterDelete = userData.filter((v, i) => i != indexNumber);
+    toast.success("Data deleted successfully");
+    setUserData(filterDataafterDelete);
+  };
+
+  let editRow = (indexNumber) => {
+    let editData = userData.filter((v, i) => i == indexNumber)[0];
+    // toast.success("Data updated successfully");
+    editData["index"] = indexNumber;
+    setFormData(editData);
   };
 
   return (
     <Container fluid>
+      <ToastContainer />
       <Container>
         <Row>
           <Col className="text-center py-5">
@@ -123,19 +159,25 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                {userData.map((user, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{user.uname}</td>
-                    <td>{user.uemail}</td>
-                    <td>{user.uphone}</td>
-                    <td>{user.umessage}</td>
-                    <td>
-                      <button>Delete</button>
-                      <button>Edit</button>
-                    </td>
+                {userData.length >= 1 ? (
+                  userData.map((user, index) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>{user.uname}</td>
+                      <td>{user.uemail}</td>
+                      <td>{user.uphone}</td>
+                      <td>{user.umessage}</td>
+                      <td>
+                        <button onClick={() => deleteRow(index)}>Delete</button>
+                        <button onClick={() => editRow(index)}>Update</button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6}>No Data found</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </Table>
           </Col>
