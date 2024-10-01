@@ -1,4 +1,4 @@
-import {useState,useCallback} from "react";
+import {useState,useCallback,useEffect,useRef} from "react";
 
 function App() {
 
@@ -6,32 +6,45 @@ function App() {
   const [numberAllowed,setNumberAllowed] = useState(false);
   const [charAllowed,setCharAllowed] = useState(false);
   const [password,setPassword] = useState("");
+  const passwordRef = useRef(null);
+
+  const copyPasswordToClipboard = useCallback(() => {
+    passwordRef.current?.select();
+    passwordRef.current?.setSelectionRange(0,100);
+    window.navigator.clipboard.writeText(password)
+  },[password])
+
   const passwordGenerator = useCallback(() => {
     let pass = ""
     let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     if(numberAllowed) str += "0123456789"
     if(charAllowed) str += "!@#$%^&*().";
 
-    for (let i=1;i <= Array.length;i++){
+    for (let i=1;i <= length;i++){
       let char = Math.floor(Math.random() * str.length+1)
-      pass = str.charAt(char)
+      pass += str.charAt(char)
     }
     setPassword(pass);
   },[length , numberAllowed ,charAllowed,setPassword])
 
+  useEffect( () => {
+    passwordGenerator()
+  },[length,numberAllowed,charAllowed,passwordGenerator])
+
   return (
     <>
-      <div className="w-full max-w-md mx-auto shadow-md rounded-lg p-4 my-8 text-orange-500 bg-gray-700">
-        <h1 className="text-white text-center my-3">Password Generator</h1>
-        <div className="flex shadow rounded-lg overflow-hidden mb-4">
+      <div className="w-full max-w-md p-4 mx-auto my-8 text-orange-500 bg-gray-700 rounded-lg shadow-md">
+        <h1 className="my-3 text-center text-white">Password Generator</h1>
+        <div className="flex mb-4 overflow-hidden rounded-lg shadow">
           <input
             type="text"
             value={password}
-            className="outline-none w-full py-1 px-3"
+            className="w-full px-3 py-1 outline-none"
             placeholder="Password"
             readOnly
+            ref={passwordRef}
           />
-          <button className="outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0">
+          <button className="outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0" onClick={copyPasswordToClipboard}>
             copy
           </button>
         </div>
